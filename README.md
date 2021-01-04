@@ -1,2 +1,3 @@
 # scala-study
-Demonstration projects for Scala project
+
+Demonstration programs  for Scala project

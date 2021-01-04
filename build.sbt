@@ -10,14 +10,15 @@ val commonSettings = Seq(
   libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
 )
 lazy val root = (project in file("."))
-  .aggregate(example)
+  .aggregate(concurrency)
   .settings(
     name := "scala-study"
   )
 
-lazy val example = project
-  .in(file("example"))
+lazy val concurrency = project
+  .in(file("concurrency"))
   .settings(
-    name := "example",
+    name := "concurrency",
+    libraryDependencies += "org.typelevel" %% "cats-effect" % "2.3.1",
   )
   .settings(commonSettings :_*)
