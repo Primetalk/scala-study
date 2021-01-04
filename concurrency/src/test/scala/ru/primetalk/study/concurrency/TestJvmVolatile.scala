@@ -26,12 +26,16 @@ class TestJvmVolatile:
         i += 1
       completed = true
     var sum: Long = 0L
+    @volatile
+    var sumIsReady: Boolean = false 
     val checkSimpleVar: Runnable = () =>
       var i = 0
       while(!completed)
         if flag then sum += simpleVar
+      sumIsReady = true
         
     val f1 = ec.submit(updateSimpleVar)
     ec.submit(checkSimpleVar)
     f1.get()
+    while(!sumIsReady) Thread.sleep(1)
     assertEquals(0L, sum)
