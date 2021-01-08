@@ -9,6 +9,7 @@ val commonSettings = Seq(
   scalaVersion := scala3Version,
   libraryDependencies ++= Seq(
     "com.novocode" % "junit-interface" % "0.11" % "test",
+    "org.typelevel" %% "cats-effect" % "3.0.0-M5",
   //    "org.scalatest" %% "scalatest" % "3.1.0" % Test
   )
 )
@@ -25,8 +26,7 @@ lazy val root = (project in file("."))
 lazy val concurrency = project
   .in(file("concurrency"))
   .settings(
-    name := "concurrency",
-    libraryDependencies += "org.typelevel" %% "cats-effect" % "2.3.1",
+    name := "concurrency", 
   )
   .settings(commonSettings :_*)
 
@@ -37,10 +37,20 @@ lazy val akkaExamples = project
   .settings(
     name := "akkaExamples",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect" % "2.3.1",
       "com.typesafe.akka" % "akka-actor-typed_2.13" % akkaVersion,
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "com.typesafe.akka" % "akka-actor-testkit-typed_2.13" % akkaVersion % Test,
     ),
   )
   .settings(commonSettings :_*)
+
+lazy val fs2Streaming = project
+  .in(file("fs2Streaming"))
+  .settings(
+    name := "fs2Streaming",
+    libraryDependencies ++= Seq(
+      "co.fs2" %% "fs2-core" % "3.0.0-M7",
+      "co.fs2" %% "fs2-io" % "3.0.0-M7",
+    ),
+  )
+  .settings(commonSettings:_*)

@@ -3,12 +3,12 @@ package ru.primetalk.study.concurrency
 import org.junit.Test
 import org.junit.Assert._
 import cats.effect.IO
-import cats.effect.ContextShift
 
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
+import cats.effect.unsafe.implicits.global
 
-class TestIO extends Ints:
+class TestIO extends ru.primetalk.study.concurrency.Ints:
 
   val processorCount = Runtime.getRuntime().availableProcessors()
   
@@ -51,10 +51,8 @@ class TestIO extends Ints:
   given ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   val cpuPool: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
 
-  given ContextShift[IO] = IO.contextShift(summon[ExecutionContext])
-
   def cpuEval[A](ioa: IO[A]): IO[A] =
-    summon[ContextShift[IO]].evalOn(cpuPool)(ioa)
+    ioa.evalOn(cpuPool)
 
   @Test def testIOAsync: Unit =
     def avg(pred: Int => Boolean)(ints: Array[Int]): IO[Double] = IO{
@@ -64,7 +62,7 @@ class TestIO extends Ints:
     val ioAvgEven = avg(_ % 2 == 0)(_)
     val ioAvgOdd = avg(_ % 2 == 1)(_)
     val ioDiff = for {
-      ints <- IO.shift *> ioInts // NB! ioInts is executed once
+      ints <- ioInts
       even <- cpuEval(ioAvgEven(ints))
       odd <- cpuEval(ioAvgOdd(ints))
     } yield

@@ -1,17 +1,15 @@
 package ru.primetalk.study.cats
 
+import cats.effect.{FiberIO, IO, OutcomeIO}
+import cats.effect.Deferred
 import org.junit.Test
-import cats.effect.IO
-import cats.effect.Fiber
-import cats.effect.concurrent.Deferred
-import cats.effect.ContextShift
 
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
+import cats.effect.unsafe.implicits.global
 
 class TestKeyWalletCats:
   given ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
-  given ContextShift[IO] = IO.contextShift(summon[ExecutionContext])
 
   def threadId: Long = Thread.currentThread().getId
 
@@ -47,15 +45,17 @@ class TestKeyWalletCats:
       ReadyToLeaveHome("Bobby", Keys(), Wallet()))
 
   @Test def testKeyWalletFiber: Unit =
-    def leaveHomeFiber(who: String)(using ContextShift[IO]): IO[ReadyToLeaveHome] =
+    def leaveHomeFiber(who: String): IO[ReadyToLeaveHome] =
       val keysIO = KeyCabinet.obtainKeys(who)
       val walletIO = Drawer.obtainWallet(who)
       println(s"leaveHomeFiber ($threadId)")
       for
         keysFiber <- keysIO.start
         walletFiber <- walletIO.start
-        keys <- keysFiber.join
-        wallet <- walletFiber.join
+        keysResult <- keysFiber.join
+        walletResult <- walletFiber.join
+        keys <- keysResult.embedNever
+        wallet <- walletResult.embedNever
         _ <- IO{ println(s"obtained both keys and wallet ($threadId)") } 
       yield ReadyToLeaveHome(who, keys, wallet)
 
@@ -64,12 +64,12 @@ class TestKeyWalletCats:
 
   @Test def testKeyWalletDeferred: Unit =
     extension[A](io: IO[A])
-      def >>>(result: Deferred[IO, A]): IO[Unit] = io.flatMap(result.complete)
+      def >>>(result: Deferred[IO, A]): IO[Unit] = io.flatMap(result.complete).map(_ => ())
 
-    def startIOinFiber[A](io: IO[A], result: Deferred[IO, A])(using ContextShift[IO]): IO[Fiber[IO,Unit]] =
+    def startIOinFiber[A](io: IO[A], result: Deferred[IO, A]): IO[FiberIO[Unit]] =
        (io >>> result).start 
-       
-    def leaveHomeWithDeferred(who: String)(using ContextShift[IO]): IO[ReadyToLeaveHome] =
+
+    def leaveHomeWithDeferred(who: String): IO[ReadyToLeaveHome] =
       val keysIO = KeyCabinet.obtainKeys(who)
       val walletIO = Drawer.obtainWallet(who)
       println(s"leaveHomeWithDeferred ($threadId)")
@@ -78,7 +78,6 @@ class TestKeyWalletCats:
         deferredWallet <- Deferred[IO, Wallet]
         _ <- startIOinFiber(keysIO, deferredKeys)
         _ <- startIOinFiber(walletIO, deferredWallet)
-        _ <- IO.shift
         keys <- deferredKeys.get
         wallet <- deferredWallet.get
         _ <- IO{ println(s"obtained both keys and wallet ($threadId)") }
