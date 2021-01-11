@@ -51,6 +51,8 @@ lazy val fs2Streaming = project
     libraryDependencies ++= Seq(
       "co.fs2" %% "fs2-core" % "3.0.0-M7",
       "co.fs2" %% "fs2-io" % "3.0.0-M7",
+      "com.typesafe.akka" % "akka-actor-typed_2.13" % akkaVersion,
+      "com.typesafe.akka" % "akka-stream_2.13" % akkaVersion,
     ),
   )
   .settings(commonSettings:_*)
