@@ -9,9 +9,13 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import scala.util.Random
 
-class TestIntCount extends Ints:
+class TestIntCount:
+  def randomInts(r: Random, maxValue: Int): Stream[IO, Int] =
+    Stream.eval(IO{r.nextInt(maxValue)}) ++ randomInts(r, maxValue)
+  
+  val digits = randomInts(new Random(0), 10)
+  
   @Test def testIntCount: Unit =
-    val digits = randomInts(new Random(0), 10)
     val partialCounts = digits.mapAccumulate(Map[Int, Int]()){
       case (map, digit) =>
         val map2 = map.updated(digit, map.getOrElse(digit, 0) + 1)
