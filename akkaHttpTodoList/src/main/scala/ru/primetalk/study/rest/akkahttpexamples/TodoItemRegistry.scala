@@ -14,7 +14,7 @@ object TodoItemRegistry:
   // responses
   final case class ActionPerformed(description: String)
 
-  def apply(): Behavior[Command] = registry(Set.empty)
+  def apply(): Behavior[Command] = registry(Set(TodoItem("Do work")))
 
   private def registry(items: Set[TodoItem]): Behavior[Command] =
     Behaviors.receiveMessage {

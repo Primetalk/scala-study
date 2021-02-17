@@ -107,9 +107,9 @@ lazy val akkaHttpTodoList = project
       "com.typesafe.akka" % "akka-stream_2.13"              % akkaVersion,
       "ch.qos.logback"    % "logback-classic"           % "1.2.3",
 
-//      "com.typesafe.akka" %% "akka-http-testkit"        % akkaHttpVersion % Test,
-//      "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion     % Test,
-//      "org.scalatest"     %% "scalatest"                % "3.1.4"         % Test
+      "com.typesafe.akka" % "akka-http-testkit_2.13"        % akkaHttpVersion % Test,
+      "com.typesafe.akka" % "akka-actor-testkit-typed_2.13" % akkaVersion     % Test,
+      "org.scalatest"     % "scalatest_2.13"                % "3.1.4"         % Test
     )
 
   )

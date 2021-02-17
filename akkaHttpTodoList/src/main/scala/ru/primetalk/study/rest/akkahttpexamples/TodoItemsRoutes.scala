@@ -19,7 +19,7 @@ class TodoItemsRoutes(itemsRegistry: ActorRef[TodoItemRegistry.Command])(implici
   import JsonFormats._
 
   // If ask takes more time than this to complete the request is failed
-  private implicit val timeout: Timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
+  private implicit val timeout: Timeout = Timeout.create(java.time.Duration.ofSeconds(5))//system.settings.config.getDuration("my-app.routes.ask-timeout"))
 
   def getItems(): Future[List[TodoItem]] =
     itemsRegistry.ask(GetTodoItems(_))
@@ -31,7 +31,7 @@ class TodoItemsRoutes(itemsRegistry: ActorRef[TodoItemRegistry.Command])(implici
       pathPrefix("items") {
         pathEnd {
           get {
-            complete(StatusCodes.OK, getItems().value.get)
+            complete(StatusCodes.OK, getItems())
           }
         }
       },
