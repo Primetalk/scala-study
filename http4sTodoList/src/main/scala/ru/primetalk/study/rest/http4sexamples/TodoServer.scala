@@ -8,14 +8,15 @@ import org.http4s.implicits._
 
 import scala.concurrent.ExecutionContext.global
 
-object TodoServer extends IOApp with TodoListRoutes[IO]:
+object TodoServer extends IOApp with TodoListRoutes[IO] with Config:
   
-  val app = (todoListRoutes <+>
+  val app = (
+    todoListRoutes <+>
     todoListModifyRoutes
     ).orNotFound
   
   val server = BlazeServerBuilder[IO](global)
-    .bindHttp(8040)
+    .bindHttp(port)
     .withHttpApp(app)
     
   val serverResource = server.resource

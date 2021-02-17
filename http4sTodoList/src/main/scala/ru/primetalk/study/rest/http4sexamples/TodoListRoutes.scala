@@ -23,22 +23,23 @@ trait TodoListRoutes[F[_]]:
     HttpRoutes.of[F] {
       case GET -> Root / "item" / name =>
         for
-        greeting <- hello(name)
-        resp <- Ok(greeting)
-          yield
-            resp
+          greeting <- hello(name)
+          resp <- Ok(greeting)
+        yield
+          resp
       case GET -> Root / "items" =>
         for
-        items <- Storage.list[F]
-        resp <- Ok(items)
-          yield
-            resp
+          items <- Storage.list[F]
+          resp <- Ok(items)
+        yield
+          resp
     }
   def todoListModifyRoutes(using Sync[F], MonadThrow[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root /"item" =>
         for
           item <- req.as[TodoItem]
+          _ <- (println(s"Item: $item")).pure
           _ <- Storage.prepend(item)
           resp <- Ok(item)
         yield
