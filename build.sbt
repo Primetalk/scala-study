@@ -34,7 +34,8 @@ lazy val concurrency = project
   )
   .settings(commonSettings :_*)
 
-lazy val akkaVersion = "2.6.10"
+lazy val akkaVersion    = "2.6.12"
+lazy val akkaHttpVersion = "10.2.3"
 
 lazy val akkaExamples = project
   .in(file("akkaExamples"))
@@ -85,4 +86,30 @@ lazy val http4sTodoList = project
     libraryDependencies += "io.circe" % "circe-literal_2.13" % CirceVersion,
     mainClass := Some("ru.primetalk.study.rest.http4sexamples.TodoServer"),
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
+  )
+
+lazy val akkaHttpTodoList = project
+  .in(file("akkaHttpTodoList"))
+  .settings(
+    name := "akkaHttpTodoList",
+    scalaVersion := scala3Version,
+
+    libraryDependencies += "io.circe" % "circe-core_2.13" % CirceVersion,
+    libraryDependencies += "io.circe" % "circe-generic_2.13" % CirceVersion,
+    libraryDependencies += "io.circe" % "circe-parser_2.13" % CirceVersion,
+    libraryDependencies += "io.circe" % "circe-literal_2.13" % CirceVersion,
+    mainClass := Some("ru.primetalk.study.rest.akkahttpexamples.TodoServer"),
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" % "akka-http_2.13"                % akkaHttpVersion,
+      "com.typesafe.akka" % "akka-http-spray-json_2.13"     % akkaHttpVersion,
+      "com.typesafe.akka" % "akka-actor-typed_2.13"         % akkaVersion,
+      "com.typesafe.akka" % "akka-stream_2.13"              % akkaVersion,
+      "ch.qos.logback"    % "logback-classic"           % "1.2.3",
+
+//      "com.typesafe.akka" %% "akka-http-testkit"        % akkaHttpVersion % Test,
+//      "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion     % Test,
+//      "org.scalatest"     %% "scalatest"                % "3.1.4"         % Test
+    )
+
   )
