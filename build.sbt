@@ -1,14 +1,14 @@
-val scala3Version = "3.0.0-M3"
-val mainVersion = "0.2.0-SNAPSHOT"
+val scala3Version = "3.0.0-RC3"
+val mainVersion = "0.3.0-SNAPSHOT"
 
 ThisBuild / organization := "ru.primetalk"
 ThisBuild / version      := mainVersion
 ThisBuild / scalaVersion := scala3Version
 
-val catsEffect = "org.typelevel" % "cats-effect_3.0.0-M3" % "3.0.0-RC1"
+val catsEffect = "org.typelevel" %% "cats-effect" % "3.1.0"
 val fs2 = libraryDependencies ++= Seq(
-  "co.fs2" % "fs2-core_3.0.0-M3" % "3.0.0-M8",
-  "co.fs2" % "fs2-io_3.0.0-M3" % "3.0.0-M8",
+  "co.fs2" %% "fs2-core" % "3.0.2",
+  "co.fs2" %% "fs2-io" % "3.0.2",
 )
 val commonSettings = Seq(
   scalaVersion := scala3Version,
@@ -62,28 +62,32 @@ lazy val fs2Streaming = project
   )
   .settings(commonSettings:_*)
 
-val Http4sVersion = "0.22.0-M3"//"0.21.19"
-val CirceVersion = "0.13.0"
+//libraryDependencies += "org.http4s" % "http4s-core_3.0.0-RC2" % "1.0.0-M21"
+
+val Http4sVersion = "1.0.0-M21"//"0.21.19"
+//val Http4sVersion = "0.22.0-M3"//"0.21.19"
+val CirceVersion = "0.14.0-M6"//"0.13.0"
+val circe = Seq(
+  "io.circe" %% "circe-core" % CirceVersion,
+  "io.circe" %% "circe-generic" % CirceVersion,
+  "io.circe" %% "circe-parser" % CirceVersion,
+  "io.circe" %% "circe-literal" % CirceVersion,
+)
+
 lazy val http4sTodoList = project
   .in(file("http4sTodoList"))
   .settings(
     name := "http4sTodoList",
     scalaVersion := scala3Version,
-    libraryDependencies += "org.http4s" % "http4s-circe_2.13" % Http4sVersion,
-    libraryDependencies += "org.http4s" % "http4s-core_2.13" % Http4sVersion,
-    libraryDependencies += "org.http4s" % "http4s-dsl_2.13" % Http4sVersion,
-    libraryDependencies += "org.http4s" % "http4s-circe_2.13" % Http4sVersion,
-    libraryDependencies ++= Seq(
-      "org.http4s"      % "http4s-blaze-server_2.13" % Http4sVersion,
-      "org.http4s"      % "http4s-blaze-client_2.13" % Http4sVersion,
-    ),
+    libraryDependencies += "org.http4s" % "http4s-core_3.0.0-RC2" % Http4sVersion,
+    libraryDependencies += "org.http4s" % "http4s-dsl_3.0.0-RC2" % Http4sVersion,
+    libraryDependencies += "org.http4s" % "http4s-circe_3.0.0-RC2" % Http4sVersion,
+    libraryDependencies += "org.http4s" % "http4s-blaze-server_3.0.0-RC2" % Http4sVersion,
+    libraryDependencies += "org.http4s" % "http4s-blaze-client_3.0.0-RC2" % Http4sVersion,
 
-    libraryDependencies += "org.http4s" % "blaze-http_2.13" % "0.14.15",
+    libraryDependencies += "org.http4s" % "blaze-http_2.13" % "0.15.0-M3",
 
-    libraryDependencies += "io.circe" % "circe-core_2.13" % CirceVersion,
-    libraryDependencies += "io.circe" % "circe-generic_2.13" % CirceVersion,
-    libraryDependencies += "io.circe" % "circe-parser_2.13" % CirceVersion,
-    libraryDependencies += "io.circe" % "circe-literal_2.13" % CirceVersion,
+    libraryDependencies ++= circe,
     mainClass := Some("ru.primetalk.study.rest.http4sexamples.TodoServer"),
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
   )
@@ -94,10 +98,7 @@ lazy val akkaHttpTodoList = project
     name := "akkaHttpTodoList",
     scalaVersion := scala3Version,
 
-    libraryDependencies += "io.circe" % "circe-core_2.13" % CirceVersion,
-    libraryDependencies += "io.circe" % "circe-generic_2.13" % CirceVersion,
-    libraryDependencies += "io.circe" % "circe-parser_2.13" % CirceVersion,
-    libraryDependencies += "io.circe" % "circe-literal_2.13" % CirceVersion,
+    libraryDependencies ++= circe,
     mainClass := Some("ru.primetalk.study.rest.akkahttpexamples.TodoServer"),
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
     libraryDependencies ++= Seq(
