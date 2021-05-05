@@ -29,3 +29,11 @@ trait Ints:
       
   def loadInts(): Array[Int] = 
     readInts(intsFile)
+
+  val isEven: Int => Boolean = _ % 2 == 0
+  val isOdd:  Int => Boolean = _ % 2 == 1
+
+  extension (arr: Array[Int]) 
+    def average: Double = 1.0 * arr.sum / arr.length
+
+  val evenOddThreshold = 2.0

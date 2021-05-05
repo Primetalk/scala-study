@@ -14,25 +14,26 @@ class TestFutures extends Ints:
     val futureInts: Future[Array[Int]] = Future{
       loadInts()
     }
-    def avg(pred: Int => Boolean): Future[Double] = futureInts.
-      map{ ints =>
-        1.0 * ints.filter(pred).sum / ints.length
-      }
+    def avg(pred: Int => Boolean)(using ExecutionContext): Future[Double] =
+      futureInts
+        .map(_.filter(pred))
+        .map(_.average)
     
-    val futureAvgEven = avg(_ % 2 == 0)
-    val futureAvgOdd = avg(_ % 2 == 1)
+    val futureAvgEven = avg(isEven)
+    val futureAvgOdd  = avg(isOdd)
     // NB. The above two futures have just started.
-    val futureDiff = for {
-      even <- futureAvgEven
-      odd <- futureAvgOdd
-    } yield
-      math.abs(even - odd)
+    val futureDiff: Future[Double] =
+      for
+        evenAvg <- futureAvgEven
+        oddAvg  <- futureAvgOdd
+      yield
+        math.abs(evenAvg - oddAvg)
 
 // Alternative implementation - starts the second future only after the first is completed
 //    val futureDiff = for {
-//      even <- avg(_ % 2 == 0)
-//      odd <- avg(_ % 2 == 1)
+//      even <- avg(isEven)
+//      odd  <- avg(_ % 2 == 1)
 //    } yield
 //      math.abs(even - odd)
     val diff = Await.result(futureDiff, 10.seconds)
-    assertTrue(diff < 1.0)
+    assertTrue(diff < evenOddThreshold)

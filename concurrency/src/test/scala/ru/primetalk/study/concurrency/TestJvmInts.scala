@@ -11,30 +11,30 @@ import scala.concurrent.{Await, blocking}
 import scala.util.Random
 
 class TestJvmInts extends Ints:
-  def avgInts(f: File, pred: Int => Boolean): Double =
-    val ints = readInts(f)
-    val avg = 1.0 * ints.filter(pred).sum / ints.length
-    avg
-  
+  def avgOfFilteredInts(f: File, pred: Int => Boolean): Double =
+    readInts(f)
+      .filter(pred)
+      .average
+
   @Test def testThreads(): Unit =
-    
+
     class ThreadPredAverage(f: File, pred: Int => Boolean, result: Array[Double]) extends Thread("ThreadPredAverage"):
-      
-      override def run: Unit = 
-        result(0) = avgInts(f, pred)
-    
+
+      override def run: Unit =
+        result(0) = avgOfFilteredInts(f, pred)
+
     val avgEvenVar: Array[Double] = new Array[Double](1)
     val avgOddVar: Array[Double] = new Array[Double](1)
-    val threadEven = new ThreadPredAverage(intsFile, _ % 2 == 0, avgEvenVar)
-    val threadOdd = new ThreadPredAverage(intsFile, _ % 2 == 1, avgOddVar)
+    val threadEven = new ThreadPredAverage(intsFile, isEven, avgEvenVar)
+    val threadOdd = new ThreadPredAverage(intsFile, isOdd, avgOddVar)
     threadEven.start()
     threadOdd.start()
     threadEven.join()
     threadOdd.join()
 
-    val avgEven = avgEvenVar(0) 
-    val avgOdd = avgOddVar(0) 
-    assertTrue(math.abs(avgEven - avgOdd) < 1.0)
+    val avgEven = avgEvenVar(0)
+    val avgOdd = avgOddVar(0)
+    assertTrue(math.abs(avgEven - avgOdd) < evenOddThreshold)
 
   val ec = Executors.newCachedThreadPool()
 
@@ -42,12 +42,12 @@ class TestJvmInts extends Ints:
     val avgEvenVar: Array[Double] = new Array[Double](1)
     val avgOddVar: Array[Double] = new Array[Double](1)
     val taskEven = new Runnable:
-      override def run(): Unit = 
-        avgEvenVar(0) = avgInts(intsFile, _ % 2 == 0)
-    
+      override def run(): Unit =
+        avgEvenVar(0) = avgOfFilteredInts(intsFile, isEven)
+
     val taskOdd = new Runnable:
-      override def run(): Unit = 
-        avgOddVar(0) = avgInts(intsFile, _ % 2 == 1)
+      override def run(): Unit =
+        avgOddVar(0) = avgOfFilteredInts(intsFile, isOdd)
     
     val fEven = ec.submit(taskEven)
     val fOdd = ec.submit(taskOdd)
@@ -56,26 +56,27 @@ class TestJvmInts extends Ints:
 
     val avgEven = avgEvenVar(0)
     val avgOdd = avgOddVar(0)
-    assertTrue(math.abs(avgEven - avgOdd) < 1.0)
+    assertTrue(math.abs(avgEven - avgOdd) < evenOddThreshold)
 
-  def sumCountInts(f: File, pred: Int => Boolean): (Double, Int) =
+  def readSumCountInts(f: File, pred: Int => Boolean): (Double, Int) =
     val ints = readInts(f)
-    (1.0 * ints.filter(pred).sum, ints.length)
-  
+    val filtered = ints.filter(pred)
+    (1.0 * filtered.sum, filtered.length)
+
   @Test def testAtomic(): Unit =
     class Avg(pred: Int => Boolean):
       val lenVar: AtomicInteger = new AtomicInteger
       val sumVar: DoubleAdder = new DoubleAdder
-      val task = new Runnable {
+      val task = new Runnable:
         override def run(): Unit =
-          val (sum, len) = sumCountInts(intsFile, pred)
+          val (sum, len) = readSumCountInts(intsFile, pred)
           sumVar.add(sum)
           lenVar.set(len)
-      }
+
       def avg = sumVar.doubleValue() / lenVar.get()
     
-    val even = new Avg(_ % 2 == 0)
-    val odd = new Avg(_ % 2 == 1)
+    val even = new Avg(isEven)
+    val odd = new Avg(isOdd)
     val fEven = ec.submit(even.task)
     val fOdd = ec.submit(odd.task)
     fEven.get()
@@ -83,4 +84,4 @@ class TestJvmInts extends Ints:
   
     val avgEven = even.avg
     val avgOdd = odd.avg
-    assertTrue(math.abs(avgEven - avgOdd) < 1.0)
+    assertTrue(math.abs(avgEven - avgOdd) < evenOddThreshold)
