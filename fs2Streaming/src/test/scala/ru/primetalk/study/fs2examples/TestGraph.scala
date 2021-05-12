@@ -49,10 +49,13 @@ class TestGraph:
       val mergeS = Stream.eval(Queue.unbounded[IO, Option[Int]])
       mergeS.flatMap {
         merge =>
+          // noneTerminate - чтобы передать служебный сигнал окончания потока данных сквозь очередь.
+          val f2withTermination: Pipe[IO, Int, Nothing] = f2.andThen(_.noneTerminate.evalMap(merge.offer).drain)
+          val f4withTermination: Pipe[IO, Int, Nothing] = f4.andThen(_.noneTerminate.evalMap(merge.offer).drain)
           f1(in)
-            .broadcastTo(// broadcast - без отдельного компонента.
-              f2.andThen(_.noneTerminate.evalMap(merge.offer).drain),// noneTerminate - чтобы передать служебный сигнал окончания потока данных сквозь очередь.
-              f4.andThen(_.noneTerminate.evalMap(merge.offer).drain),
+            .broadcastThrough(// broadcast - без отдельного компонента.
+              f2withTermination,
+              f4withTermination,
             )
             .merge(
               Stream.repeatEval(merge.take).unNoneTerminate // ловим сигнал завершения потока (None)
