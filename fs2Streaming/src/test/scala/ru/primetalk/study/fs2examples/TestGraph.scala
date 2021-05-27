@@ -38,11 +38,25 @@ class TestGraph:
     val res = Await.result(g, 1.second)
     assert(res == List(31, 31, 32, 32, 33, 33), s"res = $res")
 
-  @Test def testGraphFs2: Unit =
+  @Test
+  def testGraphFs2: Unit =
     import fs2.{Pipe, Pure, Stream}
     import cats.effect.IO
     import cats.effect.std.Queue
     import cats.effect.unsafe.implicits.global
+    // подсчитываем, сколько раз встретился признак окончания None
+    def countNone[A]: Pipe[IO, Option[A], (Option[A], Int)] = 
+      _.scan((None: Option[A], 0)){ 
+        case ((_, cnt), None) => (None, cnt + 1)
+        case ((_, cnt), opt) =>  (opt, cnt)
+      }
+    // ждём появления ровно n раз None для того, чтобы завершить поток.
+    def unNoneUntilN[A](n: Int): Pipe[IO, Option[A], A] =
+      _.through(countNone)
+       .takeWhile(_._2 < n)
+       .flatMap(p => Stream.emits(p._1.toSeq))
+
+    // def mergeN()
     def flowSystem(in: Stream[IO, Int]): Stream[IO, Int] =
       val f1: Pipe[IO, Int, Int] = _.map(_ + 10)
       val f2, f3, f4 = f1
@@ -58,12 +72,13 @@ class TestGraph:
               f4withTermination,
             )
             .merge(
-              Stream.repeatEval(merge.take).unNoneTerminate // ловим сигнал завершения потока (None)
+              Stream.repeatEval(merge.take)
+                .through(unNoneUntilN(2)) // ловим 2 сигнала завершения потока (None)
             )
             .through(f3)
       }
     val res = Stream(1,2,3).through(flowSystem).compile.toList.unsafeRunSync()
-    assert(res == List(31, 31, 32, 32, 33, 33), s"res = $res")
+    assert(res.sorted == List(31, 31, 32, 32, 33, 33), s"res = $res")
 
   @Test def testGraphSynapseGrid: Unit =
     import ru.primetalk.synapse.core._
