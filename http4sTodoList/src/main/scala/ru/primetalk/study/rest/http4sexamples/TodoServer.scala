@@ -2,7 +2,7 @@ package ru.primetalk.study.rest.http4sexamples
 
 import cats.effect.{IO, IOApp, ExitCode}
 import cats.effect.syntax._
-import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.blaze.server.BlazeServerBuilder
 import cats.implicits._
 import org.http4s.implicits._
 

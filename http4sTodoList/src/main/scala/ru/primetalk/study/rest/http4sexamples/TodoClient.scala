@@ -3,7 +3,7 @@ package ru.primetalk.study.rest.http4sexamples
 import cats.effect.{ExitCode, IO, IOApp}
 import org.http4s._
 import org.http4s.client._
-import org.http4s.client.blaze._
+import org.http4s.blaze.client.BlazeClientBuilder
 import scala.concurrent.ExecutionContext.global
 import org.http4s.client.dsl.io._
 import org.http4s.headers._

@@ -1,13 +1,13 @@
 package ru.primetalk.study.rest.http4sexamples
 
-import cats.{Applicative, Monad}
-import cats.effect.{MonadThrow, Sync}
+import cats.{Applicative, Monad, MonadThrow}
+import cats.effect.{Concurrent, Sync, IO}
 import org.http4s.circe._
 import org.http4s.{EntityEncoder, HttpRoutes}
 import org.http4s.dsl.Http4sDsl
 import cats.syntax.all._
 import io.circe.Encoder
-import org.http4s.circe.jsonEncoderOf
+import org.http4s.circe.jsonDecoder
 
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
@@ -34,7 +34,7 @@ trait TodoListRoutes[F[_]]:
         yield
           resp
     }
-  def todoListModifyRoutes(using Sync[F], MonadThrow[F]): HttpRoutes[F] =
+  def todoListModifyRoutes(using Concurrent[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root /"item" =>
         for

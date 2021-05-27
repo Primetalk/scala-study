@@ -1,7 +1,7 @@
 package ru.primetalk.study.rest.http4sexamples
 
 import cats.Defer
-import cats.effect.Sync
+import cats.effect.{Concurrent, Sync}
 import cats.syntax.all._
 
 object Storage:
@@ -10,7 +10,7 @@ object Storage:
   def list[F[_]](using Sync[F]): F[List[TodoItem]] =
     items.pure
 
-  def prepend[F[_]: Sync](item: TodoItem): F[Unit] = Sync[F].pure{ 
+  def prepend[F[_]: Concurrent](item: TodoItem): F[Unit] = Concurrent[F].pure{ 
     items = item :: items 
   }
   
