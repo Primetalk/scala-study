@@ -1,5 +1,5 @@
 val scala3Version = "3.0.0"
-val mainVersion = "0.4.0-SNAPSHOT"
+val mainVersion = "0.5.0-SNAPSHOT"
 
 ThisBuild / organization := "ru.primetalk"
 ThisBuild / version      := mainVersion
@@ -29,6 +29,14 @@ lazy val root = (project in file("."))
   .settings(
     name := "scala-study"
   )
+
+lazy val dataStructures = project
+  .in(file("dataStructures"))
+  .settings(
+    name := "dataStructures",
+    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.15.4"
+  )
+  .settings(commonSettings :_*)
 
 lazy val concurrency = project
   .in(file("concurrency"))
