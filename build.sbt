@@ -1,14 +1,14 @@
-val scala3Version = "3.0.0"
+val scala3Version = "3.1.0"
 val mainVersion = "0.5.0-SNAPSHOT"
 
 ThisBuild / organization := "ru.primetalk"
 ThisBuild / version      := mainVersion
 ThisBuild / scalaVersion := scala3Version
 
-val catsEffect = "org.typelevel" %% "cats-effect" % "3.1.1"
+val catsEffect = "org.typelevel" %% "cats-effect" % "3.2.8"
 val fs2 = libraryDependencies ++= Seq(
-  "co.fs2" %% "fs2-core" % "3.0.4",
-  "co.fs2" %% "fs2-io" % "3.0.4",
+  "co.fs2" %% "fs2-core" % "3.2.2",
+  "co.fs2" %% "fs2-io" % "3.2.2",
 )
 val commonSettings = Seq(
   scalaVersion := scala3Version,
@@ -45,8 +45,8 @@ lazy val concurrency = project
   )
   .settings(commonSettings :_*)
 
-lazy val akkaVersion    = "2.6.14"
-lazy val akkaHttpVersion = "10.2.4"
+lazy val akkaVersion    = "2.6.17"
+lazy val akkaHttpVersion = "10.2.6"
 
 lazy val akkaExamples = project
   .in(file("akkaExamples"))
@@ -54,7 +54,7 @@ lazy val akkaExamples = project
     name := "akkaExamples",
     libraryDependencies ++= Seq(
       "com.typesafe.akka" % "akka-actor-typed_2.13" % akkaVersion,
-      "ch.qos.logback" % "logback-classic" % "1.2.3",
+      "ch.qos.logback" % "logback-classic" % "1.2.7",
       "com.typesafe.akka" % "akka-actor-testkit-typed_2.13" % akkaVersion % Test,
     ),
   )
@@ -117,11 +117,11 @@ lazy val akkaHttpTodoList = project
       "com.typesafe.akka" % "akka-http-spray-json_2.13"     % akkaHttpVersion,
       "com.typesafe.akka" % "akka-actor-typed_2.13"         % akkaVersion,
       "com.typesafe.akka" % "akka-stream_2.13"              % akkaVersion,
-      "ch.qos.logback"    % "logback-classic"           % "1.2.3",
+      "ch.qos.logback"    % "logback-classic"           % "1.2.7",
 
       "com.typesafe.akka" % "akka-http-testkit_2.13"        % akkaHttpVersion % Test,
       "com.typesafe.akka" % "akka-actor-testkit-typed_2.13" % akkaVersion     % Test,
-      "org.scalatest"     % "scalatest_2.13"                % "3.1.4"         % Test
+      "org.scalatest"     % "scalatest_2.13"                % "3.2.9"         % Test
     )
 
   )
