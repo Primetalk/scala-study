@@ -7,7 +7,7 @@ import java.util.concurrent.Executors
 import scala.concurrent.{Await, ExecutionContext, Future, duration}
 import duration.DurationInt
 
-class TestFutures extends Ints:
+class Test5Futures extends Ints:
   given ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
   @Test def testFutures: Unit =

@@ -6,7 +6,7 @@ import org.junit.Assert._
 import java.util.concurrent.ForkJoinPool
 import scala.util.Random
 
-class TestForkJoinSum extends Ints:
+class Test3ForkJoinSum extends Ints:
   
   val ints = randomInts(new Random(0), 1000)
     .take(1_000_000)

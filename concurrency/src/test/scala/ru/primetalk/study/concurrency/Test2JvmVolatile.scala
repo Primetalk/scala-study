@@ -5,7 +5,7 @@ import org.junit.Test
 
 import java.util.concurrent.Executors
 
-class TestJvmVolatile:
+class Test2JvmVolatile:
   val ec = Executors.newCachedThreadPool()
 
   @Test def testVolatile(): Unit =

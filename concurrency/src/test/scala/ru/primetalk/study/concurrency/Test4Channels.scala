@@ -4,7 +4,7 @@ import org.junit.{Assert, Test}
 
 import java.util.concurrent.{Exchanger, Executors}
 
-class TestChannels:
+class Test4Channels:
   val ec = Executors.newCachedThreadPool()
 
   @Test def testChannels: Unit =

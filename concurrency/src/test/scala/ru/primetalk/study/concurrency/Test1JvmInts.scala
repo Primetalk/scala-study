@@ -10,11 +10,21 @@ import java.util.concurrent.atomic.{AtomicInteger, DoubleAdder}
 import scala.concurrent.{Await, blocking}
 import scala.util.Random
 
-class TestJvmInts extends Ints:
+class Test1JvmInts extends Ints:
+  /** Universal function example for running inside threads.
+   * reads - IO
+   * filter/average - CPU
+   */
   def avgOfFilteredInts(f: File, pred: Int => Boolean): Double =
     readInts(f)
       .filter(pred)
       .average
+      
+  /** Similar function but returns sum and count that are enought for average calculation.*/
+  def readSumCountInts(f: File, pred: Int => Boolean): (Double, Int) =
+    val ints = readInts(f)
+    val filtered = ints.filter(pred)
+    (1.0 * filtered.sum, filtered.length)
 
   @Test def testThreads(): Unit =
 
@@ -58,10 +68,6 @@ class TestJvmInts extends Ints:
     val avgOdd = avgOddVar(0)
     assertTrue(math.abs(avgEven - avgOdd) < evenOddThreshold)
 
-  def readSumCountInts(f: File, pred: Int => Boolean): (Double, Int) =
-    val ints = readInts(f)
-    val filtered = ints.filter(pred)
-    (1.0 * filtered.sum, filtered.length)
 
   @Test def testAtomic(): Unit =
     class Avg(pred: Int => Boolean):
