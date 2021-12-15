@@ -5,6 +5,10 @@ import org.junit.Test
 
 import java.util.concurrent.Executors
 
+/** 
+ * NB! Not recommended!
+ * For volatile demonstration purposes only.
+ */
 class Test2JvmVolatile:
   val ec = Executors.newCachedThreadPool()
 

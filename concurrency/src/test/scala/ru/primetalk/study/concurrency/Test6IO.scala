@@ -41,6 +41,7 @@ class Test6IO extends Ints:
 
   @Test def testIO2: Unit =
 
+    // : Array[Int] => IO[Double]
     val ioAvgEven = filteredAverage(isEven)(_)
     val ioAvgOdd  = filteredAverage(isOdd)(_)
     val ioDiff =
@@ -60,12 +61,13 @@ class Test6IO extends Ints:
   @Test def testIOAsync: Unit =
     val ioAvgEven = filteredAverage(isEven)(_)
     val ioAvgOdd = filteredAverage(isOdd)(_)
-    val ioDiff = for {
-      ints <- ioInts
-      even <- ioAvgEven(ints).evalOn(cpuPool)
-      odd  <- ioAvgOdd(ints).evalOn(cpuPool)
-    } yield
-      math.abs(even - odd)
+    val ioDiff = 
+      for
+        ints <- ioInts
+        even <- ioAvgEven(ints).evalOn(cpuPool)
+        odd  <- ioAvgOdd(ints).evalOn(cpuPool)
+      yield
+        math.abs(even - odd)
     // Until here nothing is even started.
     val diff = ioDiff.unsafeRunSync()
     assertTrue(diff < evenOddThreshold)

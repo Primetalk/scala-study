@@ -23,6 +23,7 @@ class Test5Futures extends Ints:
     val futureAvgOdd  = avg(isOdd)
     // NB. The above two futures have just started.
     val futureDiff: Future[Double] =
+      // futureAvgEven.flatMap{evenAvg => avg(isOdd).map{ oddAvg => math.abs(evenAvg - oddAvg)}}
       for
         evenAvg <- futureAvgEven
         oddAvg  <- futureAvgOdd

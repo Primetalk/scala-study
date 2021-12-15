@@ -8,7 +8,7 @@ import scala.util.Random
 
 class Test3ForkJoinSum extends Ints:
   
-  val ints = randomInts(new Random(0), 1000)
+  val ints = new Random(0).randomInts(1000)
     .take(1_000_000)
     .toIndexedSeq
   

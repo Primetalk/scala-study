@@ -9,6 +9,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.{AtomicInteger, DoubleAdder}
 import scala.concurrent.{Await, blocking}
 import scala.util.Random
+import java.util.concurrent.Callable
 
 class Test1JvmInts extends Ints:
   /** Universal function example for running inside threads.
@@ -51,6 +52,17 @@ class Test1JvmInts extends Ints:
   @Test def testRunnable(): Unit =
     val avgEvenVar: Array[Double] = new Array[Double](1)
     val avgOddVar: Array[Double] = new Array[Double](1)
+    
+    def task(pred: Int => Boolean, resultVar: Array[Double]): Runnable =
+      new Runnable:
+        override def run(): Unit =
+          resultVar(0) = avgOfFilteredInts(intsFile, pred)
+
+    // def task2(pred: Int => Boolean): Callable[Double] =
+    //   new Callable[Double]:
+    //     override def call(): Double =
+    //       avgOfFilteredInts(intsFile, pred)
+
     val taskEven = new Runnable:
       override def run(): Unit =
         avgEvenVar(0) = avgOfFilteredInts(intsFile, isEven)

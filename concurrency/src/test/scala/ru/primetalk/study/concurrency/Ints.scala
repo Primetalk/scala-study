@@ -5,8 +5,9 @@ import java.nio.file.Files
 import scala.util.Random
 
 trait Ints:
-  def randomInts(r: Random, maxValue: Int): LazyList[Int] =
-    r.nextInt(maxValue) #:: randomInts(r, maxValue)
+  extension (r: Random)
+    def randomInts(maxValue: Int): LazyList[Int] =
+      r.nextInt(maxValue) #:: r.randomInts(maxValue)
 
   def createTempFileOfInts(ints: LazyList[Int]): File =
     val content = ints
@@ -16,11 +17,12 @@ trait Ints:
     Files.writeString(f.toPath, content)
     f
 
-  lazy val intsFile =
-    val ints = randomInts(new Random(0), 1000)
+  lazy val intsFile: File =
+    val ints = new Random(0).randomInts(1000)
       .take(1_000_000)
     createTempFileOfInts(ints)
 
+  /** Slow IO from a real file. */
   def readInts(f: File): Array[Int] =
     Files
       .readString(f.toPath)
