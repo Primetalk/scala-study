@@ -12,7 +12,7 @@ object BinHeap:
 
 given BinHeapImpl: Heap[BHeap] with
   def merge[T: Ordering](a: BHeap[T], b: BHeap[T]): BinHeap.BHeap[T] =
-    (a, b) match {
+    (a, b) match
       case (Nil, b) => b
       case (a, Nil) => a
       case (ah :: at, bh :: bt) =>
@@ -24,7 +24,6 @@ given BinHeapImpl: Heap[BHeap] with
           ah :: merge(at, b)
         else
           bh :: merge(a, bt)
-    }
 
   def link[T: Ordering](a: BinHeap.BinHeap[T], b: BinHeap.BinHeap[T]): BinHeap.BinHeap[T] =
     assert(a.rank == b.rank)
@@ -43,13 +42,12 @@ given BinHeapImpl: Heap[BHeap] with
     h.map(_.elem).minOption
 
   def deleteMin[T: Ordering](h: BHeap[T]): BHeap[T] =
-    findMinBinHeap(h) match {
+    findMinBinHeap(h) match
       case Some(min) =>
         val elem = min.elem
         merge(h.filterNot(_.eq(min)), min.list)
       case None =>
         empty
-    }
 
   def empty[T: Ordering]: BinHeap.BHeap[T] =
     Nil
@@ -64,7 +62,7 @@ given BinHeapImpl: Heap[BHeap] with
     h.isEmpty
 
   def toListDesc[T: Ordering](h: BinHeap.BHeap[T], res: List[T] = Nil): List[T] =
-    findMinBinHeap(h) match {
+    findMinBinHeap(h) match
       case Some(min) =>
         toListDesc(
           merge(h.filterNot(_.eq(min)), min.list.reverse),
@@ -72,4 +70,3 @@ given BinHeapImpl: Heap[BHeap] with
         )
       case None =>
         res
-    }
