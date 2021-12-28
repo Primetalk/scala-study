@@ -8,6 +8,10 @@ import akka.actor.typed.scaladsl.Behaviors
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
+/** 
+ * Два простых эктора, обменивающихся сообщениями пинг/понг.
+ * Экторы идентичные.
+ */
 class TestSimpleActors:
   /** Сообщения, которыми обмениваются акторы */
   sealed trait Ball
@@ -15,28 +19,31 @@ class TestSimpleActors:
   /** @param from - обратный адрес, куда следует направлять ответы. */
   final case class Ping(count: Int, from: ActorRef[Ball]) extends Ball
   final case class Pong(count: Int, from: ActorRef[Ball]) extends Ball
-  
-  /** Мы хотим закончить обмен через 1000 шагов. */
-  val maxCount = 1000
+//  final case class BallImpl[P](count: Int, from: ActorRef[Ball]) extends Ball
+
+  /** Мы хотим закончить обмен через $maxCount шагов. */
+  val maxCount = 100
   
   /** Собственно логика актора, который может принимать сообщения Ball */
   def pingPong: Behavior[Ball] = 
     Behaviors.receive {
       // Вместе с сообщением мы принимаем контекст, дающий доступ к внутренностям актора.
-      case (context, Ping(count, from)) =>
+      case (context, Ping(count, from)) => //        context.
         println(s"Ping($count)")
         from ! Pong(count + 1, context.self) // передаём ссылку на себя, чтобы ответы поступали обратно
+//        if count == 100 then pingPongAlternativeBehavior else
         Behaviors.same
       case (context, Pong(count, from)) =>
         if count < maxCount then 
           from ! Ping(count + 1, context.self)
         else
-          println("Completed")
+          println("Completed")// разрываем цикл, путём отказа от поддержания диалога.
         Behaviors.same
     }
-
+  def pingPongAlternativeBehavior: Behavior[Ball] = ???
   /** Корневой актор всей системы. 
-   * NotUsed - что-то вроде Unit'а. Используется для совместимости с Java. */
+   * NotUsed - что-то вроде Unit'а. 
+   * Используется для совместимости с Java. */
   def guard(): Behavior[NotUsed] = 
     // Удобный способ отделить получение контекста от обработки сообщений.
     Behaviors.setup { context =>
@@ -46,11 +53,12 @@ class TestSimpleActors:
       // имена должны быть уникальными.
       val p2: ActorRef[Ball] = context.spawn(pingPong, "p2")
       
-//      p1 ! ...
-      Behaviors.receiveMessage { _ =>
+      Behaviors.receiveMessage { _ => // запустить обмен можно любым сообщением.
         p1 ! Ping(0, p2) // первым сообщением два актора связываются между собой
+                         // NB: В первом сообщении мы отправляем эктора, с которым следует обмениваться.
         println("started Pinging")
-        // изменим поведение главного актора. Теперь при получении сообщения он завершит работу всей системы
+        // изменим поведение главного актора. 
+        // Теперь при получении сообщения он завершит работу всей системы.
         Behaviors.receive{ (_, _) =>  
           Behaviors.stopped // на этом работа корневого актора завершается
         }
