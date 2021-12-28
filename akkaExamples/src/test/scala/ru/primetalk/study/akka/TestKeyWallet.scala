@@ -17,19 +17,20 @@ class TestKeyWallet:
     case class Wallet()
 
     // Дочерний эктор. По запросу возвращает ключи
-    object KeyCabinet {
-      case class GetKeys(whoseKeys: String, replyTo: ActorRef[Keys])
+    object KeyCabinet:
+      // запрос на получение ключей
+      final case class GetKeys(whoseKeys: String, replyTo: ActorRef[Keys])
 
       def apply(): Behavior[GetKeys] =
         Behaviors.receiveMessage {
           case GetKeys(_, replyTo) =>
             replyTo ! Keys()
+            // replyTo ! Keys2Impl() 
             Behaviors.same
         }
-    }
 
     // Дочерний эктор. По запросу возвращает бумажник
-    object Drawer {
+    object Drawer:
       case class GetWallet(whoseWallet: String, replyTo: ActorRef[Wallet])
 
       def apply(): Behavior[GetWallet] =
@@ -38,24 +39,23 @@ class TestKeyWallet:
             replyTo ! Wallet()
             Behaviors.same
         }
-    }
 
-    object Home {
+    object Home:
       // командный внешний интерфейс эктора Home
       sealed trait Command
       case class LeaveHome(who: String, replyTo: ActorRef[ReadyToLeaveHome]) extends Command
-//      private case class Response(r: ReadyToLeaveHome) extends Command - скрытая часть интерфейса эктора
+//      private case class Response(r: ReadyToLeaveHome) extends Command// - скрытая часть интерфейса эктора
       
       // Ответ эктора. Содержит экземпляры ключей и бумажника
       case class ReadyToLeaveHome(who: String, keys: Keys, wallet: Wallet)
 
       
-      def apply(): Behavior[Command] = {
+      def apply(): Behavior[Command] =
         Behaviors.setup[Command] { context =>
           val keyCabinet: ActorRef[KeyCabinet.GetKeys] = context.spawn(KeyCabinet(), "key-cabinet")
           val drawer: ActorRef[Drawer.GetWallet] = context.spawn(Drawer(), "drawer")
 
-//          Behaviors.receiveSignal() - получение уведомлений от дочерних экторов
+//          Behaviors.receiveSignal() - получение уведомлений от дочерних экторов о событиях жизненного цикла
           Behaviors.receiveMessage[Command] {
             case LeaveHome(who, replyTo) =>
               // Здесь мы создаём временного эктора, специально для выполнения возникшей задачи.
@@ -63,17 +63,16 @@ class TestKeyWallet:
               // то есть наш эктор Home не узнает о том, что произошло.
               context.spawn(prepareToLeaveHome(who, replyTo, keyCabinet, drawer), s"leaving-$who")
               Behaviors.same
-//            case Response
           }
         }
-      }
+
 
       // per session actor behavior
       def prepareToLeaveHome(
                               whoIsLeaving: String,
                               replyTo: ActorRef[ReadyToLeaveHome],
                               keyCabinet: ActorRef[KeyCabinet.GetKeys],
-                              drawer: ActorRef[Drawer.GetWallet]): Behavior[NotUsed] = {
+                              drawer: ActorRef[Drawer.GetWallet]): Behavior[Nothing] =
         // we don't _really_ care about the actor protocol here as nobody will send us
         // messages except for responses to our queries, so we just accept any kind of message
         // but narrow that to more limited types when we interact
@@ -108,9 +107,9 @@ class TestKeyWallet:
                 Behaviors.unhandled
             }
           }
-          .narrow[NotUsed] // we don't let anyone else know we accept anything
-      }
-    }
+          .narrow[Nothing] // we don't let anyone else know we accept anything
+          // то есть снаружи наш эктор не принимает никаких сообщений.
+
     // #per-session-child
     val testKit: ActorTestKit = ActorTestKit()
     val requestor = testKit.createTestProbe[Home.ReadyToLeaveHome]()
