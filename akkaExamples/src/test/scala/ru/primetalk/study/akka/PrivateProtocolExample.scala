@@ -24,7 +24,7 @@ class PrivateProtocolExample:
         // этот эктор будет оправлять назад экземпляр LightOff
         Behaviors.receiveMessage{
           case Start =>
-            inner ! context.self.narrow
+            inner ! InnerActor.InnerActorMessage(context.self.narrow)
             Behaviors.same
           case PrivateProtocolImpl() =>
             println("Inner actor responded")
@@ -34,9 +34,10 @@ class PrivateProtocolExample:
       .narrow
 
     object InnerActor:
-      def apply(): Behavior[ActorRef[PrivateProtocol]] = 
+      case class InnerActorMessage(reportTo: ActorRef[PrivateProtocol])
+      def apply(): Behavior[InnerActorMessage] = 
         Behaviors.receive{
-          case (context, act) =>
+          case (context, InnerActorMessage(act)) =>
             act ! PrivateProtocolImpl()
             Behaviors.stopped
         }
