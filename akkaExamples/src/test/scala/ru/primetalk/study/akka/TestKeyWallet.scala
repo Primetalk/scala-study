@@ -16,6 +16,9 @@ class TestKeyWallet:
     case class Keys()
     case class Wallet()
 
+    // Ответ эктора. Содержит экземпляры ключей и бумажника
+    case class ReadyToLeaveHome(who: String, keys: Keys, wallet: Wallet)
+
     // Дочерний эктор. По запросу возвращает ключи
     object KeyCabinet:
       // запрос на получение ключей
@@ -24,10 +27,24 @@ class TestKeyWallet:
       def apply(): Behavior[GetKeys] =
         Behaviors.receiveMessage {
           case GetKeys(_, replyTo) =>
+            Thread.sleep(100)
+            // действие 6
             replyTo ! Keys()
             // replyTo ! Keys2Impl() 
             Behaviors.same
         }
+
+    // // запрос на получение ключей
+    // final case class GetKeys(whoseKeys: String, replyTo: ActorRef[Keys])
+
+    // def KeyCabinetBehavior(): Behavior[GetKeys] =
+    //   Behaviors.receiveMessage {
+    //     case GetKeys(_, replyTo) =>
+    //       Thread.sleep(100)
+    //       replyTo ! Keys()
+    //       // replyTo ! Keys2Impl() 
+    //       Behaviors.same
+    //   }
 
     // Дочерний эктор. По запросу возвращает бумажник
     object Drawer:
@@ -36,6 +53,8 @@ class TestKeyWallet:
       def apply(): Behavior[GetWallet] =
         Behaviors.receiveMessage {
           case GetWallet(_, replyTo) =>
+            Thread.sleep(100)
+            // действие 5
             replyTo ! Wallet()
             Behaviors.same
         }
@@ -46,8 +65,6 @@ class TestKeyWallet:
       case class LeaveHome(who: String, replyTo: ActorRef[ReadyToLeaveHome]) extends Command
 //      private case class Response(r: ReadyToLeaveHome) extends Command// - скрытая часть интерфейса эктора
       
-      // Ответ эктора. Содержит экземпляры ключей и бумажника
-      case class ReadyToLeaveHome(who: String, keys: Keys, wallet: Wallet)
 
       
       def apply(): Behavior[Command] =
@@ -61,6 +78,7 @@ class TestKeyWallet:
               // Здесь мы создаём временного эктора, специально для выполнения возникшей задачи.
               // Эктор напрямую будет отправлять сформированный ответ тому эктору, который делал первоначальный запрос.
               // то есть наш эктор Home не узнает о том, что произошло.
+              // действие 2
               context.spawn(prepareToLeaveHome(who, replyTo, keyCabinet, drawer), s"leaving-$who")
               Behaviors.same
           }
@@ -82,14 +100,18 @@ class TestKeyWallet:
             var keys: Option[Keys] = None
 
             // we narrow the ActorRef type to any subtype of the actual type we accept
+            // действие 3
             keyCabinet ! KeyCabinet.GetKeys(whoIsLeaving, context.self.narrow[Keys])
+            // действие 4
             drawer ! Drawer.GetWallet(whoIsLeaving, context.self.narrow[Wallet])
 
             def nextBehavior(): Behavior[AnyRef] =
               (keys, wallet) match {
                 case (Some(w), Some(k)) =>
                   // we got both, "session" is completed!
+                  // действие 7
                   replyTo ! ReadyToLeaveHome(whoIsLeaving, w, k)
+                  // действие 8
                   Behaviors.stopped
 
                 case _ =>
@@ -112,8 +134,9 @@ class TestKeyWallet:
 
     // #per-session-child
     val testKit: ActorTestKit = ActorTestKit()
-    val requestor = testKit.createTestProbe[Home.ReadyToLeaveHome]()
+    val requestor = testKit.createTestProbe[ReadyToLeaveHome]()
 
     val home = testKit.spawn(Home(), "home")
+    // действие 1
     home ! Home.LeaveHome("Bobby", requestor.ref)
-    requestor.expectMessage(Home.ReadyToLeaveHome("Bobby", Keys(), Wallet()))
+    requestor.expectMessage(ReadyToLeaveHome("Bobby", Keys(), Wallet()))
