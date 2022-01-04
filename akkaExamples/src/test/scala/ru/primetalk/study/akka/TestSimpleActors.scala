@@ -31,8 +31,10 @@ class TestSimpleActors:
       case (context, Ping(count, from)) => //        context.
         println(s"Ping($count)")
         from ! Pong(count + 1, context.self) // передаём ссылку на себя, чтобы ответы поступали обратно
-//        if count == 100 then pingPongAlternativeBehavior else
-        Behaviors.same
+        if count >= 10 then 
+          pingPongAlternativeBehavior 
+        else
+          Behaviors.same
       case (context, Pong(count, from)) =>
         if count < maxCount then 
           from ! Ping(count + 1, context.self)
@@ -40,14 +42,31 @@ class TestSimpleActors:
           println("Completed")// разрываем цикл, путём отказа от поддержания диалога.
         Behaviors.same
     }
-  def pingPongAlternativeBehavior: Behavior[Ball] = ???
+  def pingPongAlternativeBehavior: Behavior[Ball] = 
+    Behaviors.receive {
+      // Вместе с сообщением мы принимаем контекст, дающий доступ к внутренностям актора.
+      case (context, Ping(count, from)) => //        context.
+        println("sleeping1")
+        Thread.sleep(100)
+        println(s"-Ping($count)")
+        from ! Pong(count + 1, context.self) // передаём ссылку на себя, чтобы ответы поступали обратно
+        Behaviors.same
+      case (context, Pong(count, from)) =>
+        println("sleeping")
+        Thread.sleep(100)
+        if count < maxCount then 
+          from ! Ping(count + 1, context.self)
+        else
+          println("Completed")// разрываем цикл, путём отказа от поддержания диалога.
+        Behaviors.same
+    }
   /** Корневой актор всей системы. 
    * NotUsed - что-то вроде Unit'а. 
    * Используется для совместимости с Java. */
   def guard(): Behavior[NotUsed] = 
     // Удобный способ отделить получение контекста от обработки сообщений.
     Behaviors.setup { context =>
-      
+      var i: Int = 0
       // контекст позволяет запускать новых акторов
       val p1: ActorRef[Ball] = context.spawn(pingPong, "p1")
       // имена должны быть уникальными.
@@ -67,6 +86,9 @@ class TestSimpleActors:
 
   @Test def testSimple: Unit =
     val pingPongMain: ActorSystem[NotUsed] = ActorSystem(guard(), "guard")
+    Thread.sleep(10) // подождём, пока guard создаст дочерних экторов
+
+    println(pingPongMain.printTree)
 
     //#main-send-messages
     pingPongMain ! NotUsed  // первое сообщение начнёт процесс
