@@ -10,10 +10,21 @@ import cats.effect.unsafe.implicits.global
 import scala.util.Random
 
 class TestIntCount:
-  def randomInts(r: Random, maxValue: Int): Stream[IO, Int] =
-    Stream.eval(IO{r.nextInt(maxValue)}) ++ randomInts(r, maxValue)
+  /** Генерируем одно случайное значение. 
+    * При этом происходит побочный эффект - изменяется r: Random.
+    * Поэтому при повторных вызовах - будут генерироваться новые числа.
+    */
+  def randomInt(r: Random, maxValue: Int): IO[Int] =
+    IO{r.nextInt(maxValue)}
+  /** Создаём поток одинаковых вычислений. */
+  def stream[A](io: IO[A]): Stream[IO, A] =
+    Stream.eval(io) ++ stream(io)
+  def stream1[A](io: IO[A]): Stream[IO, A] =
+    Stream.eval(io).repeat
+  def stream2[A](io: IO[A]): Stream[IO, A] =
+    Stream.repeatEval(io)
   
-  val digits = randomInts(new Random(0), 10)
+  val digits = stream(randomInt(new Random(0), 10))
   
   @Test def testIntCount: Unit =
     val partialCounts = digits.mapAccumulate(Map[Int, Int]()){

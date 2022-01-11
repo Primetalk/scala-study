@@ -5,8 +5,10 @@ import cats.effect.{ExitCode, IO, IOApp, Resource}
 import fs2.{io, text, Stream}
 import java.io.InputStream
 import cats.effect.unsafe.implicits.global
+import cats.instances.tailRec
+import scala.annotation.tailrec
 
-class TestLetterFreq:
+class Test2LetterFreq:
     def resourceIO(name: String): IO[InputStream] = 
         IO{getClass.getResourceAsStream(name)}
 
@@ -16,12 +18,29 @@ class TestLetterFreq:
 
     val wordRegEx = raw"[a-zA-Z]+".r
 
+    def wordsWithRegex(line: String): List[String] =
+        wordRegEx
+            .findAllIn(line)
+            .map(_.toString)
+            .toList
+    def wordsWithoutRegex(line: String): List[String] =
+        @tailrec
+        def wordsWithoutRegex0(line: String, result: List[String]): List[String] =
+            if line.isEmpty then
+                result.reverse
+            else
+                val lineE = line.dropWhile(!_.isLetter)
+                val word = lineE.takeWhile(_.isLetter)
+                if word.isEmpty then
+                    wordsWithoutRegex0(lineE, result)
+                else
+                    wordsWithoutRegex0(lineE.substring(word.length), word :: result)
+
+        wordsWithoutRegex0(line, Nil)
+
     def words: fs2.Pipe[IO, String, String] = 
         in => in.flatMap{ line => 
-            Stream.emits(wordRegEx
-                .findAllIn(line)
-                .map(_.toString)
-                .toList)
+            Stream.emits(wordsWithoutRegex(line))
         }
 
     val largeFileWords = largeFile
@@ -29,6 +48,7 @@ class TestLetterFreq:
         .through(text.lines)
         .through(words)
 
+    /** Накопление статистики по мере чтения файла.*/
     case class Stat(charCount: Int, length: Int)
 
     def wordStat(char: Char)(word: String): Stat =

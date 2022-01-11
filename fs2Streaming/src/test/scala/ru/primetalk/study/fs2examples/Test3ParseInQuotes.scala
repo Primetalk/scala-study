@@ -7,7 +7,7 @@ import fs2.Pull
 import fs2.Pure
 import cats.effect.IO
 
-class TestParseInQuotes:
+class Test3ParseInQuotes:
 
   def parseInQuotes: Pipe[Pure, Char, String] =
     in => in

@@ -6,7 +6,7 @@ import fs2.{io, text, Stream}
 import java.io.InputStream
 import cats.effect.unsafe.implicits.global
 
-class TestSenderQueue:
+class Test6SenderQueue:
 
     @Test def testSenderQueue: Unit =
         val (sender, stream) = Sender[Int](1)

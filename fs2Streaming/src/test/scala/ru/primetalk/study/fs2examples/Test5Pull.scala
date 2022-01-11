@@ -7,7 +7,7 @@ import org.junit.Test
 
 import java.io.InputStream
 
-class TestPull:
+class Test5Pull:
 
     extension [F[_], A](s: Stream[F, A])
         def myTake(n: Long): Stream[F, A] =

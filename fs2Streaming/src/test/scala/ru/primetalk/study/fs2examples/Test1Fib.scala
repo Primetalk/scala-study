@@ -3,7 +3,7 @@ package ru.primetalk.study.fs2examples
 import org.junit.Test
 import fs2._
 
-class TestFib:
+class Test1Fib:
     def fib(prev: BigInt, b: BigInt): Stream[Pure, BigInt] = 
         Stream.emit(b) ++ fib(b, prev + b)
 

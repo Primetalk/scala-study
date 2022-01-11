@@ -9,7 +9,7 @@ import ru.primetalk.synapse.core.{Contact, contact}
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 
-class TestGraph:
+class Test4Graph:
   @Test def testGraphAkka: Unit =
     import akka.stream.{ClosedShape, FlowShape}
     import akka.stream.scaladsl.{Flow, GraphDSL, RunnableGraph}

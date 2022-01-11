@@ -5,7 +5,7 @@ import fs2.Stream
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 
-class TestMerge:
+class Test7Merge:
 
   @Test def testMerge: Unit =
     val stream1 = Stream(1,2,3)
