@@ -68,6 +68,7 @@ lazy val fs2Streaming = project
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor-typed"      % akkaVersion,
       "com.typesafe.akka" %% "akka-stream"           % akkaVersion,
+      "ch.qos.logback"    %  "logback-classic"       % "1.2.10",
       "ru.primetalk"      % "synapse-grid-core_2.13" % "1.5.0",
     ),
   )
