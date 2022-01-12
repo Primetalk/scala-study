@@ -9,7 +9,7 @@ class Test1Fib:
 
     val fib01 = fib(0, 1)
     @Test def testFib: Unit =
-        assert(fib01.take(5).toList == List(1, 1, 2, 3, 5))
+        assert(fib01.take(5).toList == List(/*0, */1, 1, 2, 3, 5))
 
     @Test def testFib55: Unit =
         val res = fib01.drop(55).head.toList

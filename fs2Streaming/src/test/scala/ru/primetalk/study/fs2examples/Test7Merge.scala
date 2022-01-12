@@ -21,7 +21,11 @@ class Test7Merge:
     val stream1: Stream[IO, Int] = Stream[IO, Int](1,2,3)
     val stream2: Stream[IO, Int] = Stream.eval(IO {
       Thread.sleep(1000)
+      println("4")// будет напечатано, т.к. это вычисление стартует до того, как будет произведён останов.
       4
+    }) ++ Stream.eval(IO {
+      println("5") // не будет напечатано, т.к. это вычисление - в отдельном IO и будет предотвращено в результате останова потока.
+      5
     })
     val combinedStream: Stream[IO, Int] = stream1.mergeHaltBoth(stream2)
     val result = combinedStream.compile.toVector.unsafeRunSync()

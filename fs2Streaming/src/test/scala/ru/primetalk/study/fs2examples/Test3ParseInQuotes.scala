@@ -10,7 +10,7 @@ import cats.effect.IO
 class Test3ParseInQuotes:
 
   def parseInQuotes: Pipe[Pure, Char, String] =
-    in => in
+    in => in//.fold((s, o2))(...)
       .mapAccumulate[Option[List[Char]], Option[String]](None: Option[List[Char]]){
         case (None, '\"') => 
           (Some(Nil), None)
@@ -31,5 +31,8 @@ class Test3ParseInQuotes:
         |"text1" some other ignore "text2"
         |"text3 which is not completed
         |""".stripMargin.toCharArray:_*)
-    val res = input.through(parseInQuotes).compile.toList
+    val res = 
+      input
+        .through(parseInQuotes)
+        .compile.toList
     assert(res == List("text1", "text2"), s"res = $res")

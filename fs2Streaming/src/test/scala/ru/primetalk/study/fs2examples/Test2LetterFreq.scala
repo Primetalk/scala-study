@@ -14,7 +14,7 @@ class Test2LetterFreq:
 
     val largeFile: Stream[IO, Byte] =
         fs2.io.readInputStream(resourceIO("large-file.txt"),
-        chunkSize = 4096, closeAfterUse = true)
+          chunkSize = 4096, closeAfterUse = true)
 
     val wordRegEx = raw"[a-zA-Z]+".r
 
